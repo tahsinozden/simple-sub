@@ -2,6 +2,7 @@ package subutils
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -65,20 +66,20 @@ func getEncoding(cmdStr string) *charmap.Charmap {
 }
 
 func readWithEncoding(filename string, charmap *charmap.Charmap) string {
+	var buffer bytes.Buffer
 	f, err := os.Open(filename)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer f.Close()
 	r := transform.NewReader(f, charmap.NewDecoder())
-
 	sc := bufio.NewScanner(r)
-	allText := ""
-	for sc.Scan() {
-		allText += sc.Text() + "\n"
-	}
 
-	return getConvertAccentText(allText)
+	for sc.Scan() {
+		buffer.WriteString(sc.Text())
+		buffer.WriteString("\n")
+	}
+	return getConvertAccentText(buffer.String())
 }
 
 func writeToFile(fileName string, text string) {
@@ -87,9 +88,9 @@ func writeToFile(fileName string, text string) {
 }
 
 func getConvertAccentText(text string) string {
-	newText := ""
+	var buffer bytes.Buffer
 	for _, runeValue := range text {
-		newText += converter.Convert2NonAccent(string(runeValue))
+		buffer.WriteString(converter.Convert2NonAccent(string(runeValue)))
 	}
-	return newText
+	return buffer.String()
 }
