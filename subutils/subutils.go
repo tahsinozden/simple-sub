@@ -21,7 +21,8 @@ type CommandArgs struct {
 }
 
 var validModes = map[string]func(c CommandArgs){
-	"--remove-accent": removeAccentLetters,
+	"remove-accent": removeAccentLetters,
+	"parse":         parseSub,
 }
 
 var validEncodings = map[string]*charmap.Charmap{
@@ -93,4 +94,18 @@ func getConvertAccentText(text string) string {
 		buffer.WriteString(converter.Convert2NonAccent(string(runeValue)))
 	}
 	return buffer.String()
+}
+
+func parseSub(commandArgs CommandArgs) {
+	if len(commandArgs.FileName) > 0 && len(commandArgs.Encoding) > 0 {
+		txt := readWithEncoding(commandArgs.FileName, getEncoding(commandArgs.Encoding))
+		subs := CreateSubEntries(txt)
+		var buffer bytes.Buffer
+		for _, item := range subs {
+			fmt.Println(item)
+			buffer.WriteString(item.String())
+			buffer.WriteString("\n")
+		}
+		writeToFile(commandArgs.FileName+".parsed", buffer.String())
+	}
 }
