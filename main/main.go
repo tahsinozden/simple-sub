@@ -22,7 +22,9 @@ func main() {
 func parseCmd() subutils.CommandArgs {
 	var mode = flag.String("mode", "", "modes of operations : "+strings.Join(subutils.GetValidModes(), ", ")[1:])
 	var fileName = flag.String("f", "", "file name")
+	var fUp = flag.String("fup", "", "subtitle for the top side of the screen")
+	var fDown = flag.String("fdown", "", "subtitle for the downside of the screen")
 	var enc = flag.String("enc", "", "encoding type, 'pl' for Polish, 'tr' for Turkish. i.e. -enc pl")
 	flag.Parse()
-	return subutils.CommandArgs{*mode, *fileName, *enc}
+	return subutils.CommandArgs{*mode, *fileName, *enc, *fUp, *fDown}
 }

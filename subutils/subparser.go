@@ -41,19 +41,32 @@ func CreateSubEntries(text string) []SubtitleEntry {
 	time := lines[1]
 	subs := []SubtitleEntry{}
 	var buffer bytes.Buffer
+	lineCounter := 0
 	for _, item := range lines[2:] {
 		if isTimeLine(item) {
 			times := parseTimes(time)
-			subs = append(subs, SubtitleEntry{times[0], times[1], buffer.String()})
+			subs = append(subs, createSubtitleEntry(times, buffer.String()))
 			time = item
 			buffer.Reset()
+			lineCounter = 0
 			continue
 		}
+		// TODO: fix formating issue, i.e. next line combined with previous one
+		if lineCounter > 1 {
+			buffer.WriteString("\\N") // new line in subtitle form
+		}
 		buffer.WriteString(item)
+		lineCounter++
 	}
 	times := parseTimes(time)
-	subs = append(subs, SubtitleEntry{times[0], times[1], buffer.String()})
+	subs = append(subs, createSubtitleEntry(times, buffer.String()))
 	return subs
+}
+
+func createSubtitleEntry(times []string, text string) SubtitleEntry {
+	start := strings.Replace(times[0], ",", ".", -1)
+	end := strings.Replace(times[1], ",", ".", -1)
+	return SubtitleEntry{start, end, text}
 }
 
 func isTimeLine(line string) bool {

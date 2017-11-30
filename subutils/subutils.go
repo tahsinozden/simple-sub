@@ -18,11 +18,14 @@ type CommandArgs struct {
 	Mode     string
 	FileName string
 	Encoding string
+	FileUp   string
+	FileDown string
 }
 
 var validModes = map[string]func(c CommandArgs){
 	"remove-accent": removeAccentLetters,
 	"parse":         parseSub,
+	"merge":         mergeSubtitles,
 }
 
 var validEncodings = map[string]*charmap.Charmap{
@@ -49,7 +52,7 @@ func (c *CommandArgs) Run() {
 }
 
 func (c CommandArgs) String() string {
-	return fmt.Sprintf("Mode: %s\nFileName: %s\nEncoding: %s\n", c.Mode, c.FileName, c.Encoding)
+	return fmt.Sprintf("Mode: %s\nFileName: %s\nEncoding: %s\nFileUp: %s\nFileDown: %s", c.Mode, c.FileName, c.Encoding, c.FileUp, c.FileDown)
 }
 
 func removeAccentLetters(commandArgs CommandArgs) {
@@ -106,5 +109,16 @@ func parseSub(commandArgs CommandArgs) {
 			buffer.WriteString("\n")
 		}
 		writeToFile(commandArgs.FileName+".parsed", buffer.String())
+	}
+}
+
+func mergeSubtitles(c CommandArgs) {
+	if len(c.FileUp) > 0 && len(c.FileDown) > 0 && len(c.Encoding) > 0 {
+		txt := readWithEncoding(c.FileUp, getEncoding(c.Encoding))
+		subUp := CreateSubEntries(txt)
+		txt = readWithEncoding(c.FileDown, getEncoding(c.Encoding))
+		subDown := CreateSubEntries(txt)
+		merged := Merge(subUp, subDown)
+		writeToFile(c.FileUp+"merged.ssa", merged)
 	}
 }
