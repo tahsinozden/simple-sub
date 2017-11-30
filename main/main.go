@@ -20,7 +20,7 @@ func main() {
 }
 
 func parseCmd() subutils.CommandArgs {
-	var mode = flag.String("mode", "", "modes of operations : "+strings.Join(subutils.GetValidModes(), " "))
+	var mode = flag.String("mode", "", "modes of operations : "+strings.Join(subutils.GetValidModes(), ", ")[1:])
 	var fileName = flag.String("f", "", "file name")
 	var enc = flag.String("enc", "", "encoding type, 'pl' for Polish, 'tr' for Turkish. i.e. -enc pl")
 	flag.Parse()

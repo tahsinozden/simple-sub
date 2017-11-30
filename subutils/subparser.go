@@ -18,6 +18,10 @@ func (s SubtitleEntry) String() string {
 	return fmt.Sprintf("%s %s %s", s.StartTime, s.EndTime, s.Text)
 }
 
+// 00:01:01,833
+var reTime = regexp.MustCompile("[0-9]+:[0-9]+:[0-9]+,[0-9]+")
+var reText = regexp.MustCompile("[a-z]+")
+
 func filterText(text string) []string {
 	allLines := strings.Split(text, "\n")
 	filtered := make([]string, 1)
@@ -53,17 +57,13 @@ func CreateSubEntries(text string) []SubtitleEntry {
 }
 
 func isTimeLine(line string) bool {
-	re := regexp.MustCompile("[0-9]+:[0-9]+:[0-9]+,[0-9]+")
-	return len(re.FindAllString(line, -1)) > 0
+	return len(reTime.FindAllString(line, -1)) > 0
 }
 
 func isTextLine(line string) bool {
-	re := regexp.MustCompile("[a-z]+")
-	return len(re.FindAllString(line, -1)) > 0
+	return len(reText.FindAllString(line, -1)) > 0
 }
 
 func parseTimes(time string) []string {
-	// 00:01:01,833
-	re := regexp.MustCompile("[0-9]+:[0-9]+:[0-9]+,[0-9]+")
-	return re.FindAllString(time, 2)
+	return reTime.FindAllString(time, 2)
 }

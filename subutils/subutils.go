@@ -102,7 +102,6 @@ func parseSub(commandArgs CommandArgs) {
 		subs := CreateSubEntries(txt)
 		var buffer bytes.Buffer
 		for _, item := range subs {
-			fmt.Println(item)
 			buffer.WriteString(item.String())
 			buffer.WriteString("\n")
 		}
