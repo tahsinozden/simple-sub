@@ -26,5 +26,5 @@ func parseCmd() subutils.CommandArgs {
 	var fDown = flag.String("fdown", "", "subtitle for the downside of the screen")
 	var enc = flag.String("enc", "", "encoding type, 'pl' for Polish, 'tr' for Turkish. i.e. -enc pl")
 	flag.Parse()
-	return subutils.CommandArgs{*mode, *fileName, *enc, *fUp, *fDown}
+	return subutils.CommandArgs{Mode: *mode, FileName: *fileName, Encoding: *enc, FileUp: *fUp, FileDown: *fDown}
 }

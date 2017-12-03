@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"simple-sub/converter"
 
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
@@ -94,7 +93,7 @@ func writeToFile(fileName string, text string) {
 func getConvertAccentText(text string) string {
 	var buffer bytes.Buffer
 	for _, runeValue := range text {
-		buffer.WriteString(converter.Convert2NonAccent(string(runeValue)))
+		buffer.WriteString(Convert2NonAccent(string(runeValue)))
 	}
 	return buffer.String()
 }

@@ -1,4 +1,4 @@
-package converter
+package subutils
 
 var accentCharMapping = map[string]string{
 	// single letters
