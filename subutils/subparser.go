@@ -32,17 +32,17 @@ func filterText(text string) []string {
 		}
 	}
 
-	return filtered
+	return filtered[2:]
 }
 
 // CreateSubEntries : creates subtitle entries from text
 func CreateSubEntries(text string) []SubtitleEntry {
 	lines := filterText(text)
-	time := lines[1]
+	time := lines[0]
 	var subs []SubtitleEntry
 	var buffer bytes.Buffer
 	lineCounter := 0
-	for _, item := range lines[2:] {
+	for _, item := range lines[1:] {
 		if isTimeLine(item) {
 			times := parseTimes(time)
 			subs = append(subs, createSubtitleEntry(times, buffer.String()))
@@ -64,11 +64,19 @@ func CreateSubEntries(text string) []SubtitleEntry {
 }
 
 func createSubtitleEntry(times []string, text string) SubtitleEntry {
-	t1, t2 := times[0], times[1]
-	t1, t2 = t1[:len(t1)-1], t2[:len(t2)-1]
+	t1, t2 := getFormattedTime(times)
 	start := strings.Replace(t1, ",", ".", -1)
 	end := strings.Replace(t2, ",", ".", -1)
 	return SubtitleEntry{start, end, text}
+}
+
+func getFormattedTime(times []string) (string, string) {
+	if len(times) < 2 {
+		return "", ""
+	}
+	t1, t2 := times[0], times[1]
+	t1, t2 = t1[:len(t1)-1], t2[:len(t2)-1]
+	return t1, t2
 }
 
 func isTimeLine(line string) bool {
