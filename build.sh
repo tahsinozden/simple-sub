@@ -1,5 +1,5 @@
 #!/bin/bash
 
-declare -r MAIN_FILE="main.go"
+declare -r APP_NAME="simple-sub"
 
-go build ${MAIN_FILE} 
+go build -o ${APP_NAME}
