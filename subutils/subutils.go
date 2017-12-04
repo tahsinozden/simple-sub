@@ -25,8 +25,8 @@ type CommandArgs struct {
 
 var validModes = map[string]func(c CommandArgs){
 	"remove-accent": removeAccentLetters,
-	"parse":         parseSub,
-	"merge":         mergeSubtitles,
+	"parse":         ParseSub,
+	"merge":         MergeSubtitles,
 }
 
 var validEncodings = map[string]*charmap.Charmap{
@@ -85,6 +85,22 @@ func readWithEncoding(filename string, charmap *charmap.Charmap) string {
 	return getConvertAccentText(buffer.String())
 }
 
+func simpleRead(filename string) string {
+	f, err := os.Open(filename)
+	if err != nil {
+		log.Fatal("couldn't open file", filename)
+	}
+	defer f.Close()
+	sc := bufio.NewScanner(f)
+	var buffer bytes.Buffer
+
+	for sc.Scan() {
+		buffer.WriteString(sc.Text())
+		buffer.WriteString("\n")
+	}
+	return getConvertAccentText(buffer.String())
+}
+
 func writeToFile(fileName string, text string) {
 	perm := os.FileMode(0644)
 	ioutil.WriteFile(fileName, []byte(text), perm)
@@ -98,32 +114,6 @@ func getConvertAccentText(text string) string {
 	return buffer.String()
 }
 
-func parseSub(commandArgs CommandArgs) {
-	if len(commandArgs.FileName) > 0 && len(commandArgs.Encoding) > 0 {
-		txt := readWithEncoding(commandArgs.FileName, getEncoding(commandArgs.Encoding))
-		subs := CreateSubEntries(txt)
-		var buffer bytes.Buffer
-		for _, item := range subs {
-			buffer.WriteString(item.String())
-			buffer.WriteString("\n")
-		}
-		writeToFile(commandArgs.FileName+".parsed", buffer.String())
-	}
-}
-
-func mergeSubtitles(c CommandArgs) {
-	if hasAllSubMergeParams(c) {
-		txt := readWithEncoding(c.FileSubTop, getEncoding(c.EncSubTop))
-		subUp := CreateSubEntries(txt)
-		txt = readWithEncoding(c.FileSubBottom, getEncoding(c.EncSubBottom))
-		subDown := CreateSubEntries(txt)
-		merged := Merge(subUp, subDown)
-		writeToFile(c.FileSubTop+".merged.ssa", merged)
-	} else {
-		log.Fatal("Missing merge params!")
-	}
-}
-
 func hasAllSubMergeParams(c CommandArgs) bool {
-	return len(c.FileSubTop) > 0 && len(c.FileSubBottom) > 0 && len(c.EncSubTop) > 0 && len(c.EncSubBottom) > 0
+	return len(c.FileSubTop) > 0 && len(c.FileSubBottom) > 0
 }
