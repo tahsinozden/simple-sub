@@ -39,7 +39,7 @@ func filterText(text string) []string {
 func CreateSubEntries(text string) []SubtitleEntry {
 	lines := filterText(text)
 	time := lines[1]
-	subs := []SubtitleEntry{}
+	var subs []SubtitleEntry
 	var buffer bytes.Buffer
 	lineCounter := 0
 	for _, item := range lines[2:] {
@@ -51,7 +51,7 @@ func CreateSubEntries(text string) []SubtitleEntry {
 			lineCounter = 0
 			continue
 		}
-		// TODO: fix formating issue, i.e. next line combined with previous one
+		// TODO: fix formatting issue, i.e. next line combined with previous one
 		if lineCounter > 1 {
 			buffer.WriteString("\\N") // new line in subtitle form
 		}
@@ -64,8 +64,10 @@ func CreateSubEntries(text string) []SubtitleEntry {
 }
 
 func createSubtitleEntry(times []string, text string) SubtitleEntry {
-	start := strings.Replace(times[0], ",", ".", -1)
-	end := strings.Replace(times[1], ",", ".", -1)
+	t1, t2 := times[0], times[1]
+	t1, t2 = t1[:len(t1)-1], t2[:len(t2)-1]
+	start := strings.Replace(t1, ",", ".", -1)
+	end := strings.Replace(t2, ",", ".", -1)
 	return SubtitleEntry{start, end, text}
 }
 

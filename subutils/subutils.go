@@ -14,11 +14,13 @@ import (
 
 // CommandArgs : commandline args
 type CommandArgs struct {
-	Mode     string
-	FileName string
-	Encoding string
-	FileUp   string
-	FileDown string
+	Mode          string
+	FileName      string
+	Encoding      string
+	FileSubTop    string
+	FileSubBottom string
+	EncSubTop     string
+	EncSubBottom  string
 }
 
 var validModes = map[string]func(c CommandArgs){
@@ -50,14 +52,12 @@ func (c *CommandArgs) Run() {
 	}
 }
 
-func (c CommandArgs) String() string {
-	return fmt.Sprintf("Mode: %s\nFileName: %s\nEncoding: %s\nFileUp: %s\nFileDown: %s", c.Mode, c.FileName, c.Encoding, c.FileUp, c.FileDown)
-}
-
-func removeAccentLetters(commandArgs CommandArgs) {
-	if len(commandArgs.FileName) > 0 && len(commandArgs.Encoding) > 0 {
-		txt := readWithEncoding(commandArgs.FileName, getEncoding(commandArgs.Encoding))
-		writeToFile(commandArgs.FileName+".new", txt)
+func removeAccentLetters(c CommandArgs) {
+	if len(c.FileName) > 0 && len(c.Encoding) > 0 {
+		txt := readWithEncoding(c.FileName, getEncoding(c.Encoding))
+		writeToFile(c.FileName+".accents-removed.srt", txt)
+	} else {
+		log.Fatal("Missing remove-accent params!")
 	}
 }
 
@@ -112,12 +112,18 @@ func parseSub(commandArgs CommandArgs) {
 }
 
 func mergeSubtitles(c CommandArgs) {
-	if len(c.FileUp) > 0 && len(c.FileDown) > 0 && len(c.Encoding) > 0 {
-		txt := readWithEncoding(c.FileUp, getEncoding(c.Encoding))
+	if hasAllSubMergeParams(c) {
+		txt := readWithEncoding(c.FileSubTop, getEncoding(c.EncSubTop))
 		subUp := CreateSubEntries(txt)
-		txt = readWithEncoding(c.FileDown, getEncoding(c.Encoding))
+		txt = readWithEncoding(c.FileSubBottom, getEncoding(c.EncSubBottom))
 		subDown := CreateSubEntries(txt)
 		merged := Merge(subUp, subDown)
-		writeToFile(c.FileUp+"merged.ssa", merged)
+		writeToFile(c.FileSubTop+".merged.ssa", merged)
+	} else {
+		log.Fatal("Missing merge params!")
 	}
+}
+
+func hasAllSubMergeParams(c CommandArgs) bool {
+	return len(c.FileSubTop) > 0 && len(c.FileSubBottom) > 0 && len(c.EncSubTop) > 0 && len(c.EncSubBottom) > 0
 }

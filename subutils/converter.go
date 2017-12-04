@@ -77,6 +77,7 @@ var accentCharMapping = map[string]string{
 	"Ĥ": "H",
 	"Ħ": "H",
 
+	"ı": "i",
 	"ì": "i",
 	"í": "i",
 	"î": "i",
