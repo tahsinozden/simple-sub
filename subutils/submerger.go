@@ -3,6 +3,7 @@ package subutils
 import (
 	"bytes"
 	"fmt"
+	"log"
 )
 
 const metadata = `
@@ -22,6 +23,20 @@ Format: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
 const subUpLineTemplate = "Dialogue: Marked=0,%s,%s,StyleA,NTP,0000,0000,0000,!Effect,%s \n"
 const subDownLineTemplate = "Dialogue: Marked=0,%s,%s,StyleB,NTP,0000,0000,0000,!Effect,%s \n"
+
+// MergeSubtitles : merges subtitles and creates a new file.
+func MergeSubtitles(c CommandArgs) {
+	if hasAllSubMergeParams(c) {
+		txt := readWithEncoding(c.FileSubTop, getEncoding(c.EncSubTop))
+		subUp := CreateSubEntries(txt)
+		txt = readWithEncoding(c.FileSubBottom, getEncoding(c.EncSubBottom))
+		subDown := CreateSubEntries(txt)
+		merged := Merge(subUp, subDown)
+		writeToFile(c.FileSubTop+".merged.ssa", merged)
+	} else {
+		log.Fatal("Missing merge params!")
+	}
+}
 
 // Merge : merges two subtitles
 func Merge(subUp []SubtitleEntry, subDown []SubtitleEntry) string {

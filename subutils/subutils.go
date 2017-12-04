@@ -25,8 +25,8 @@ type CommandArgs struct {
 
 var validModes = map[string]func(c CommandArgs){
 	"remove-accent": removeAccentLetters,
-	"parse":         parseSub,
-	"merge":         mergeSubtitles,
+	"parse":         ParseSub,
+	"merge":         MergeSubtitles,
 }
 
 var validEncodings = map[string]*charmap.Charmap{
@@ -68,6 +68,7 @@ func getEncoding(cmdStr string) *charmap.Charmap {
 	return charmap.ISO8859_1
 }
 
+// TODO: handle files having UTF-8 encoding
 func readWithEncoding(filename string, charmap *charmap.Charmap) string {
 	var buffer bytes.Buffer
 	f, err := os.Open(filename)
@@ -96,32 +97,6 @@ func getConvertAccentText(text string) string {
 		buffer.WriteString(Convert2NonAccent(string(runeValue)))
 	}
 	return buffer.String()
-}
-
-func parseSub(commandArgs CommandArgs) {
-	if len(commandArgs.FileName) > 0 && len(commandArgs.Encoding) > 0 {
-		txt := readWithEncoding(commandArgs.FileName, getEncoding(commandArgs.Encoding))
-		subs := CreateSubEntries(txt)
-		var buffer bytes.Buffer
-		for _, item := range subs {
-			buffer.WriteString(item.String())
-			buffer.WriteString("\n")
-		}
-		writeToFile(commandArgs.FileName+".parsed", buffer.String())
-	}
-}
-
-func mergeSubtitles(c CommandArgs) {
-	if hasAllSubMergeParams(c) {
-		txt := readWithEncoding(c.FileSubTop, getEncoding(c.EncSubTop))
-		subUp := CreateSubEntries(txt)
-		txt = readWithEncoding(c.FileSubBottom, getEncoding(c.EncSubBottom))
-		subDown := CreateSubEntries(txt)
-		merged := Merge(subUp, subDown)
-		writeToFile(c.FileSubTop+".merged.ssa", merged)
-	} else {
-		log.Fatal("Missing merge params!")
-	}
 }
 
 func hasAllSubMergeParams(c CommandArgs) bool {

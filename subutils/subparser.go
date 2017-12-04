@@ -22,17 +22,18 @@ func (s SubtitleEntry) String() string {
 var reTime = regexp.MustCompile("[0-9]+:[0-9]+:[0-9]+,[0-9]+")
 var reText = regexp.MustCompile("[a-z]+")
 
-func filterText(text string) []string {
-	allLines := strings.Split(text, "\n")
-	filtered := make([]string, 1)
-	for _, item := range allLines {
-		tmp := strings.TrimSpace(item)
-		if isTimeLine(tmp) || isTextLine(tmp) {
-			filtered = append(filtered, tmp)
+// ParseSub : creates subtitle entries from text and writes to a file
+func ParseSub(commandArgs CommandArgs) {
+	if len(commandArgs.FileName) > 0 && len(commandArgs.Encoding) > 0 {
+		txt := readWithEncoding(commandArgs.FileName, getEncoding(commandArgs.Encoding))
+		subs := CreateSubEntries(txt)
+		var buffer bytes.Buffer
+		for _, item := range subs {
+			buffer.WriteString(item.String())
+			buffer.WriteString("\n")
 		}
+		writeToFile(commandArgs.FileName+".parsed", buffer.String())
 	}
-
-	return filtered[2:]
 }
 
 // CreateSubEntries : creates subtitle entries from text
@@ -61,6 +62,19 @@ func CreateSubEntries(text string) []SubtitleEntry {
 	times := parseTimes(time)
 	subs = append(subs, createSubtitleEntry(times, buffer.String()))
 	return subs
+}
+
+func filterText(text string) []string {
+	allLines := strings.Split(text, "\n")
+	filtered := make([]string, 1)
+	for _, item := range allLines {
+		tmp := strings.TrimSpace(item)
+		if isTimeLine(tmp) || isTextLine(tmp) {
+			filtered = append(filtered, tmp)
+		}
+	}
+
+	return filtered[2:]
 }
 
 func createSubtitleEntry(times []string, text string) SubtitleEntry {
