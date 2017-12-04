@@ -23,16 +23,22 @@ var reTime = regexp.MustCompile("[0-9]+:[0-9]+:[0-9]+,[0-9]+")
 var reText = regexp.MustCompile("[a-z]+")
 
 // ParseSub : creates subtitle entries from text and writes to a file
-func ParseSub(commandArgs CommandArgs) {
-	if len(commandArgs.FileName) > 0 && len(commandArgs.Encoding) > 0 {
-		txt := readWithEncoding(commandArgs.FileName, getEncoding(commandArgs.Encoding))
+func ParseSub(c CommandArgs) {
+	if len(c.FileName) > 0 {
+		txt := readWithEncoding(c.FileName, getEncoding(c.Encoding))
+		if len(c.Encoding) == 0 {
+			txt = simpleRead(c.FileName)
+		} else {
+			txt = readWithEncoding(c.FileName, getEncoding(c.Encoding))
+		}
+
 		subs := CreateSubEntries(txt)
 		var buffer bytes.Buffer
 		for _, item := range subs {
 			buffer.WriteString(item.String())
 			buffer.WriteString("\n")
 		}
-		writeToFile(commandArgs.FileName+".parsed", buffer.String())
+		writeToFile(c.FileName+".parsed", buffer.String())
 	}
 }
 
@@ -52,7 +58,7 @@ func CreateSubEntries(text string) []SubtitleEntry {
 			lineCounter = 0
 			continue
 		}
-		// TODO: fix formatting issue, i.e. next line combined with previous one
+		// FIXME: fix formatting issue, i.e. next line combined with previous one
 		if lineCounter > 1 {
 			buffer.WriteString("\\N") // new line in subtitle form
 		}

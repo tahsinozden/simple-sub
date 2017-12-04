@@ -68,7 +68,6 @@ func getEncoding(cmdStr string) *charmap.Charmap {
 	return charmap.ISO8859_1
 }
 
-// TODO: handle files having UTF-8 encoding
 func readWithEncoding(filename string, charmap *charmap.Charmap) string {
 	var buffer bytes.Buffer
 	f, err := os.Open(filename)
@@ -78,6 +77,22 @@ func readWithEncoding(filename string, charmap *charmap.Charmap) string {
 	defer f.Close()
 	r := transform.NewReader(f, charmap.NewDecoder())
 	sc := bufio.NewScanner(r)
+
+	for sc.Scan() {
+		buffer.WriteString(sc.Text())
+		buffer.WriteString("\n")
+	}
+	return getConvertAccentText(buffer.String())
+}
+
+func simpleRead(filename string) string {
+	f, err := os.Open(filename)
+	if err != nil {
+		log.Fatal("couldn't open file", filename)
+	}
+	defer f.Close()
+	sc := bufio.NewScanner(f)
+	var buffer bytes.Buffer
 
 	for sc.Scan() {
 		buffer.WriteString(sc.Text())
@@ -100,5 +115,5 @@ func getConvertAccentText(text string) string {
 }
 
 func hasAllSubMergeParams(c CommandArgs) bool {
-	return len(c.FileSubTop) > 0 && len(c.FileSubBottom) > 0 && len(c.EncSubTop) > 0 && len(c.EncSubBottom) > 0
+	return len(c.FileSubTop) > 0 && len(c.FileSubBottom) > 0
 }
