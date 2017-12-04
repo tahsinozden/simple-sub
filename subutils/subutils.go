@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"simple-sub/converter"
 
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
@@ -15,13 +14,19 @@ import (
 
 // CommandArgs : commandline args
 type CommandArgs struct {
-	Mode     string
-	FileName string
-	Encoding string
+	Mode          string
+	FileName      string
+	Encoding      string
+	FileSubTop    string
+	FileSubBottom string
+	EncSubTop     string
+	EncSubBottom  string
 }
 
 var validModes = map[string]func(c CommandArgs){
-	"--remove-accent": removeAccentLetters,
+	"remove-accent": removeAccentLetters,
+	"parse":         parseSub,
+	"merge":         mergeSubtitles,
 }
 
 var validEncodings = map[string]*charmap.Charmap{
@@ -47,14 +52,12 @@ func (c *CommandArgs) Run() {
 	}
 }
 
-func (c CommandArgs) String() string {
-	return fmt.Sprintf("Mode: %s\nFileName: %s\nEncoding: %s\n", c.Mode, c.FileName, c.Encoding)
-}
-
-func removeAccentLetters(commandArgs CommandArgs) {
-	if len(commandArgs.FileName) > 0 && len(commandArgs.Encoding) > 0 {
-		txt := readWithEncoding(commandArgs.FileName, getEncoding(commandArgs.Encoding))
-		writeToFile(commandArgs.FileName+".new", txt)
+func removeAccentLetters(c CommandArgs) {
+	if len(c.FileName) > 0 && len(c.Encoding) > 0 {
+		txt := readWithEncoding(c.FileName, getEncoding(c.Encoding))
+		writeToFile(c.FileName+".accents-removed.srt", txt)
+	} else {
+		log.Fatal("Missing remove-accent params!")
 	}
 }
 
@@ -90,7 +93,37 @@ func writeToFile(fileName string, text string) {
 func getConvertAccentText(text string) string {
 	var buffer bytes.Buffer
 	for _, runeValue := range text {
-		buffer.WriteString(converter.Convert2NonAccent(string(runeValue)))
+		buffer.WriteString(Convert2NonAccent(string(runeValue)))
 	}
 	return buffer.String()
+}
+
+func parseSub(commandArgs CommandArgs) {
+	if len(commandArgs.FileName) > 0 && len(commandArgs.Encoding) > 0 {
+		txt := readWithEncoding(commandArgs.FileName, getEncoding(commandArgs.Encoding))
+		subs := CreateSubEntries(txt)
+		var buffer bytes.Buffer
+		for _, item := range subs {
+			buffer.WriteString(item.String())
+			buffer.WriteString("\n")
+		}
+		writeToFile(commandArgs.FileName+".parsed", buffer.String())
+	}
+}
+
+func mergeSubtitles(c CommandArgs) {
+	if hasAllSubMergeParams(c) {
+		txt := readWithEncoding(c.FileSubTop, getEncoding(c.EncSubTop))
+		subUp := CreateSubEntries(txt)
+		txt = readWithEncoding(c.FileSubBottom, getEncoding(c.EncSubBottom))
+		subDown := CreateSubEntries(txt)
+		merged := Merge(subUp, subDown)
+		writeToFile(c.FileSubTop+".merged.ssa", merged)
+	} else {
+		log.Fatal("Missing merge params!")
+	}
+}
+
+func hasAllSubMergeParams(c CommandArgs) bool {
+	return len(c.FileSubTop) > 0 && len(c.FileSubBottom) > 0 && len(c.EncSubTop) > 0 && len(c.EncSubBottom) > 0
 }
