@@ -10,13 +10,13 @@ import (
 
 func main() {
 	args := os.Args[1:]
-	if len(args) > 0 {
-		c := parseCmd()
-		fmt.Printf("%+v\n", c)
-		c.Run()
-	} else {
-		fmt.Println("use -help")
+	if len(args) == 0 {
+		fmt.Println("use -help for available options.")
 	}
+
+	c := parseCmd()
+	fmt.Printf("%+v\n", c)
+	c.Run()
 }
 
 func parseCmd() subutils.CommandArgs {
