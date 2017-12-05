@@ -24,22 +24,18 @@ var reText = regexp.MustCompile("[a-z]+")
 
 // ParseSub : creates subtitle entries from text and writes to a file
 func ParseSub(c CommandArgs) {
-	if len(c.FileName) > 0 {
-		txt := readWithEncoding(c.FileName, getEncoding(c.Encoding))
-		if len(c.Encoding) == 0 {
-			txt = simpleRead(c.FileName)
-		} else {
-			txt = readWithEncoding(c.FileName, getEncoding(c.Encoding))
-		}
-
-		subs := CreateSubEntries(txt)
-		var buffer bytes.Buffer
-		for _, item := range subs {
-			buffer.WriteString(item.String())
-			buffer.WriteString("\n")
-		}
-		writeToFile(c.FileName+".parsed", buffer.String())
+	if len(c.FileName) == 0 {
+		return
 	}
+
+	txt := readFile(FileInfo{FileName: c.FileName, Encoding: c.Encoding})
+	subs := CreateSubEntries(txt)
+	var buffer bytes.Buffer
+	for _, item := range subs {
+		buffer.WriteString(item.String())
+		buffer.WriteString("\n")
+	}
+	writeToFile(c.FileName+".parsed", buffer.String())
 }
 
 // CreateSubEntries : creates subtitle entries from text

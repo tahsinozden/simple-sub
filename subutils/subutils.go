@@ -3,11 +3,10 @@ package subutils
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 
+	"github.com/golang/glog"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
 )
@@ -21,6 +20,11 @@ type CommandArgs struct {
 	FileSubBottom string
 	EncSubTop     string
 	EncSubBottom  string
+}
+
+type FileInfo struct {
+	FileName string
+	Encoding string
 }
 
 var validModes = map[string]func(c CommandArgs){
@@ -45,34 +49,47 @@ func GetValidModes() []string {
 
 // Run : runs in accordance with commandline arguments
 func (c *CommandArgs) Run() {
-	if fn, ok := validModes[c.Mode]; ok {
-		fn(*c)
-	} else {
-		fmt.Println("provide a valid mode. Valid modes : ", GetValidModes())
+	fn, ok := validModes[c.Mode]
+	if !ok {
+		glog.Error("provide a valid mode. Valid modes : ", GetValidModes())
+		return
 	}
+	fn(*c)
 }
 
 func removeAccentLetters(c CommandArgs) {
-	if len(c.FileName) > 0 && len(c.Encoding) > 0 {
-		txt := readWithEncoding(c.FileName, getEncoding(c.Encoding))
-		writeToFile(c.FileName+".accents-removed.srt", txt)
-	} else {
-		log.Fatal("Missing remove-accent params!")
+	if len(c.FileName) == 0 || len(c.Encoding) == 0 {
+		glog.Error("Missing remove-accent params!")
+		return
 	}
+
+	txt := readWithEncoding(c.FileName, getEncoding(c.Encoding))
+	writeToFile(c.FileName+".accents-removed.srt", txt)
 }
 
-func getEncoding(cmdStr string) *charmap.Charmap {
-	if enc, ok := validEncodings[cmdStr]; ok {
+func getEncoding(enc string) *charmap.Charmap {
+	if enc, ok := validEncodings[enc]; ok {
 		return enc
 	}
 	return charmap.ISO8859_1
+}
+
+func readFile(f FileInfo) string {
+	if len(f.FileName) == 0 {
+		return ""
+	}
+
+	if len(f.Encoding) > 0 {
+		return readWithEncoding(f.FileName, getEncoding(f.Encoding))
+	}
+	return simpleRead(f.FileName)
 }
 
 func readWithEncoding(filename string, charmap *charmap.Charmap) string {
 	var buffer bytes.Buffer
 	f, err := os.Open(filename)
 	if err != nil {
-		log.Fatal(err)
+		glog.Fatal("couldn't open file : ", filename)
 	}
 	defer f.Close()
 	r := transform.NewReader(f, charmap.NewDecoder())
@@ -88,7 +105,7 @@ func readWithEncoding(filename string, charmap *charmap.Charmap) string {
 func simpleRead(filename string) string {
 	f, err := os.Open(filename)
 	if err != nil {
-		log.Fatal("couldn't open file", filename)
+		glog.Fatal("couldn't open file : ", filename)
 	}
 	defer f.Close()
 	sc := bufio.NewScanner(f)
@@ -109,7 +126,8 @@ func writeToFile(fileName string, text string) {
 func getConvertAccentText(text string) string {
 	var buffer bytes.Buffer
 	for _, runeValue := range text {
-		buffer.WriteString(Convert2NonAccent(string(runeValue)))
+		converted := Convert2NonAccent(string(runeValue))
+		buffer.WriteString(converted)
 	}
 	return buffer.String()
 }
