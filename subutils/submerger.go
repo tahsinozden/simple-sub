@@ -3,7 +3,7 @@ package subutils
 import (
 	"bytes"
 	"fmt"
-	"log"
+	"github.com/golang/glog"
 )
 
 const metadata = `
@@ -27,7 +27,8 @@ const subBottomLineTemplate = "Dialogue: Marked=0,%s,%s,StyleB,NTP,0000,0000,000
 // MergeSubtitles : merges subtitles and creates a new file.
 func MergeSubtitles(c CommandArgs) {
 	if !hasAllSubMergeParams(c) {
-		log.Fatal("Missing merge params!")
+		glog.Error("Missing merge params!")
+		return
 	}
 
 	subTop, subBottom := createEntries(c)

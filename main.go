@@ -12,6 +12,7 @@ func main() {
 	args := os.Args[1:]
 	if len(args) == 0 {
 		fmt.Println("use -help for available options.")
+		return
 	}
 
 	c := parseCmd()

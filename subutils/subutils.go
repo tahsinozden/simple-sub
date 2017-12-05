@@ -52,6 +52,7 @@ func (c *CommandArgs) Run() {
 	fn, ok := validModes[c.Mode]
 	if !ok {
 		glog.Error("provide a valid mode. Valid modes : ", GetValidModes())
+		return
 	}
 	fn(*c)
 }
@@ -59,6 +60,7 @@ func (c *CommandArgs) Run() {
 func removeAccentLetters(c CommandArgs) {
 	if len(c.FileName) == 0 || len(c.Encoding) == 0 {
 		glog.Error("Missing remove-accent params!")
+		return
 	}
 
 	txt := readWithEncoding(c.FileName, getEncoding(c.Encoding))
