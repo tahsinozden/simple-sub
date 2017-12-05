@@ -89,7 +89,7 @@ func readWithEncoding(filename string, charmap *charmap.Charmap) string {
 	var buffer bytes.Buffer
 	f, err := os.Open(filename)
 	if err != nil {
-		glog.Error("couldn't open file", filename)
+		glog.Fatal("couldn't open file : ", filename)
 	}
 	defer f.Close()
 	r := transform.NewReader(f, charmap.NewDecoder())
@@ -105,8 +105,7 @@ func readWithEncoding(filename string, charmap *charmap.Charmap) string {
 func simpleRead(filename string) string {
 	f, err := os.Open(filename)
 	if err != nil {
-		glog.Error("couldn't open file", filename)
-		return ""
+		glog.Fatal("couldn't open file : ", filename)
 	}
 	defer f.Close()
 	sc := bufio.NewScanner(f)
