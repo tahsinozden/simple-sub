@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome</title>
+
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.3.4"></script>
+
+</head>
+
+<body>
+<div id="app">
+    <h1>{{ message }}</h1>
+    <p>Upload a subtitle!</p>
+    <input type="file" class="form-control" @change="onFileChange">
+    <button @click="onFileSubmit">Submit</button>
+</div>
+</body>
+
+<script>
+    new Vue({
+        el: '#app',
+        data : {
+            attachment : { name : null,file: null },
+            message : "Welcome to Tubtitle!"
+        },
+        methods : {
+            onFileChange : function(event) {
+                this.attachment.file = event.target.files[0]
+            },
+            onFileSubmit: function() {
+                var form = new FormData();
+
+                form.append('name',this.attachment.name);
+                form.append('file',this.attachment.file);
+                this.$http.post('/api/upload', form).then(function(response){
+                    console.log("ok")
+                })
+            }
+        }
+    })
+
+</script>
+</html>

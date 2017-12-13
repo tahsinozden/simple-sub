@@ -9,55 +9,15 @@ import (
 	"github.com/golang/glog"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
+	"tubtitle/utils"
 )
-
-// CommandArgs : commandline args
-type CommandArgs struct {
-	Mode          string
-	FileName      string
-	Encoding      string
-	FileSubTop    string
-	FileSubBottom string
-	EncSubTop     string
-	EncSubBottom  string
-}
-
-type FileInfo struct {
-	FileName string
-	Encoding string
-}
-
-var validModes = map[string]func(c CommandArgs){
-	"remove-accent": removeAccentLetters,
-	"parse":         ParseSub,
-	"merge":         MergeSubtitles,
-}
 
 var validEncodings = map[string]*charmap.Charmap{
 	"pl": charmap.Windows1250,
 	"tr": charmap.Windows1254,
 }
 
-// GetValidModes : returns the valid modes
-func GetValidModes() []string {
-	m := make([]string, 1)
-	for k := range validModes {
-		m = append(m, k)
-	}
-	return m
-}
-
-// Run : runs in accordance with commandline arguments
-func (c *CommandArgs) Run() {
-	fn, ok := validModes[c.Mode]
-	if !ok {
-		glog.Error("provide a valid mode. Valid modes : ", GetValidModes())
-		return
-	}
-	fn(*c)
-}
-
-func removeAccentLetters(c CommandArgs) {
+func RemoveAccentLetters(c utils.CommandArgs) {
 	if len(c.FileName) == 0 || len(c.Encoding) == 0 {
 		glog.Error("Missing remove-accent params!")
 		return
@@ -74,7 +34,7 @@ func getEncoding(enc string) *charmap.Charmap {
 	return charmap.ISO8859_1
 }
 
-func readFile(f FileInfo) string {
+func readFile(f utils.FileInfo) string {
 	if len(f.FileName) == 0 {
 		return ""
 	}
@@ -99,7 +59,7 @@ func readWithEncoding(filename string, charmap *charmap.Charmap) string {
 		buffer.WriteString(sc.Text())
 		buffer.WriteString("\n")
 	}
-	return getConvertAccentText(buffer.String())
+	return GetConvertAccentText(buffer.String())
 }
 
 func simpleRead(filename string) string {
@@ -115,7 +75,7 @@ func simpleRead(filename string) string {
 		buffer.WriteString(sc.Text())
 		buffer.WriteString("\n")
 	}
-	return getConvertAccentText(buffer.String())
+	return GetConvertAccentText(buffer.String())
 }
 
 func writeToFile(fileName string, text string) {
@@ -123,7 +83,7 @@ func writeToFile(fileName string, text string) {
 	ioutil.WriteFile(fileName, []byte(text), perm)
 }
 
-func getConvertAccentText(text string) string {
+func GetConvertAccentText(text string) string {
 	var buffer bytes.Buffer
 	for _, runeValue := range text {
 		converted := Convert2NonAccent(string(runeValue))
@@ -132,6 +92,6 @@ func getConvertAccentText(text string) string {
 	return buffer.String()
 }
 
-func hasAllSubMergeParams(c CommandArgs) bool {
+func hasAllSubMergeParams(c utils.CommandArgs) bool {
 	return len(c.FileSubTop) > 0 && len(c.FileSubBottom) > 0
 }
