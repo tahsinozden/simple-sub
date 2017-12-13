@@ -6,7 +6,7 @@ import (
 	"github.com/golang/glog"
 	"io"
 	"net/http"
-	"simple-sub/utils"
+	"tubtitle/utils"
 )
 
 func receiveFile(w http.ResponseWriter, r *http.Request) {

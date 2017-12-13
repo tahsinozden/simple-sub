@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"regexp"
-	"simple-sub/utils"
 	"strings"
+	"tubtitle/utils"
 )
 
 // SubtitleEntry : simple subtitle entry

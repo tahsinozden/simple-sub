@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/golang/glog"
-	"simple-sub/utils"
+	"tubtitle/utils"
 )
 
 const metadata = `

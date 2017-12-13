@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/golang/glog"
-	"simple-sub/subutils"
-	"simple-sub/utils"
-	"simple-sub/webapi"
+	"tubtitle/utils"
+	"tubtitle/webapi"
+	"tubtitle/subutils"
 )
 
 var validModes = map[string]func(c utils.CommandArgs){

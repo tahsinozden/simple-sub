@@ -4,8 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"simple-sub/utils"
 	"strings"
+	"tubtitle/utils"
 )
 
 func main() {

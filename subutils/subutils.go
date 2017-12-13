@@ -9,7 +9,7 @@ import (
 	"github.com/golang/glog"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
-	"simple-sub/utils"
+	"tubtitle/utils"
 )
 
 var validEncodings = map[string]*charmap.Charmap{
