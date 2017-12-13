@@ -1,2 +1,2 @@
-# simple-sub
-a simple subtitle tool.
+# tubtitleb
+a simple subtitle tool which can remove accent characters, merge subtitles etc.
