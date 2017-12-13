@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/golang/glog"
+	"simple-sub/utils"
 )
 
 const metadata = `
@@ -25,7 +26,7 @@ const subTopLineTemplate = "Dialogue: Marked=0,%s,%s,StyleA,NTP,0000,0000,0000,!
 const subBottomLineTemplate = "Dialogue: Marked=0,%s,%s,StyleB,NTP,0000,0000,0000,!Effect,%s \n"
 
 // MergeSubtitles : merges subtitles and creates a new file.
-func MergeSubtitles(c CommandArgs) {
+func MergeSubtitles(c utils.CommandArgs) {
 	if !hasAllSubMergeParams(c) {
 		glog.Error("Missing merge params!")
 		return
@@ -51,7 +52,7 @@ func mergeSub(b *bytes.Buffer, template string, entries []SubtitleEntry) {
 	}
 }
 
-func createEntries(c CommandArgs) ([]SubtitleEntry, []SubtitleEntry) {
+func createEntries(c utils.CommandArgs) ([]SubtitleEntry, []SubtitleEntry) {
 	return createEntry(c.FileSubTop, c.EncSubTop), createEntry(c.FileSubBottom, c.EncSubBottom)
 }
 
@@ -60,6 +61,6 @@ func createEntry(fileName string, enc string) []SubtitleEntry {
 		return []SubtitleEntry{}
 	}
 
-	lines := readFile(FileInfo{FileName: fileName, Encoding: enc})
+	lines := readFile(utils.FileInfo{FileName: fileName, Encoding: enc})
 	return CreateSubEntries(lines)
 }

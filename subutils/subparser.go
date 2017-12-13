@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"regexp"
+	"simple-sub/utils"
 	"strings"
 )
 
@@ -23,12 +24,12 @@ var reTime = regexp.MustCompile("[0-9]+:[0-9]+:[0-9]+,[0-9]+")
 var reText = regexp.MustCompile("[a-z]+")
 
 // ParseSub : creates subtitle entries from text and writes to a file
-func ParseSub(c CommandArgs) {
+func ParseSub(c utils.CommandArgs) {
 	if len(c.FileName) == 0 {
 		return
 	}
 
-	txt := readFile(FileInfo{FileName: c.FileName, Encoding: c.Encoding})
+	txt := readFile(utils.FileInfo{FileName: c.FileName, Encoding: c.Encoding})
 	subs := CreateSubEntries(txt)
 	var buffer bytes.Buffer
 	for _, item := range subs {
