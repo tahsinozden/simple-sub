@@ -59,7 +59,7 @@ func readWithEncoding(filename string, charmap *charmap.Charmap) string {
 		buffer.WriteString(sc.Text())
 		buffer.WriteString("\n")
 	}
-	return getConvertAccentText(buffer.String())
+	return GetConvertAccentText(buffer.String())
 }
 
 func simpleRead(filename string) string {
@@ -75,7 +75,7 @@ func simpleRead(filename string) string {
 		buffer.WriteString(sc.Text())
 		buffer.WriteString("\n")
 	}
-	return getConvertAccentText(buffer.String())
+	return GetConvertAccentText(buffer.String())
 }
 
 func writeToFile(fileName string, text string) {
@@ -83,7 +83,7 @@ func writeToFile(fileName string, text string) {
 	ioutil.WriteFile(fileName, []byte(text), perm)
 }
 
-func getConvertAccentText(text string) string {
+func GetConvertAccentText(text string) string {
 	var buffer bytes.Buffer
 	for _, runeValue := range text {
 		converted := Convert2NonAccent(string(runeValue))
