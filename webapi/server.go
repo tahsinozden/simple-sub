@@ -4,39 +4,42 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/golang/glog"
-	"io"
 	"net/http"
-	"tubtitle/utils"
 	"tubtitle/subutils"
+	"tubtitle/utils"
 )
 
-func receiveFile(w http.ResponseWriter, r *http.Request) {
-	var buffer bytes.Buffer
-	file, header, err := r.FormFile("file")
-	if err != nil {
-		glog.Fatal(err)
-	}
-	defer file.Close()
-
-	fmt.Printf("File name %s\n", header.Filename)
-	io.Copy(&buffer, file)
-	contents := buffer.String()
-	fmt.Println(contents)
+type SubtitleForm struct {
+	Name string
+	File bytes.Buffer
+	Enc  string
 }
 
 func removeAccentLetters(w http.ResponseWriter, r *http.Request) {
-	var buffer bytes.Buffer
-	file, header, err := r.FormFile("file")
-	if err != nil {
-		glog.Fatal(err)
-	}
-	defer file.Close()
+	var buf bytes.Buffer
+	//fmt.Println(r)
 
-	f := header.Filename
+	fileBottom, headerBottom, err := r.FormFile("fileBottom")
+	if err != nil {
+		glog.Error(err)
+		return
+	}
+	defer fileBottom.Close()
+
+	r.ParseForm()
+	enc := r.Form["encBottom"]
+	if len(enc) == 0 {
+		glog.Warning("No encoding found!")
+		return
+	}
+	e := enc[0]
+
+	f := headerBottom.Filename
 	fmt.Printf("File name %s\n", f)
-	io.Copy(&buffer, file)
-	contents := buffer.String()
-	fmt.Println(subutils.GetConvertAccentText(contents))
+
+	buf = utils.CopyWithEncoding(fileBottom, subutils.GetEncoding(e))
+	contents := buf.String()
+	//fmt.Println(subutils.GetConvertAccentText(contents))
 
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s.accents-removed.srt", f))
 	w.Header().Set("Content-Type", r.Header.Get("Content-Type"))

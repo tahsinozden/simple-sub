@@ -2,19 +2,72 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Welcome</title>
+    <title>Tubtitle</title>
+
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css">
 
     <script src="https://unpkg.com/vue/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.3.4"></script>
 
+    <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.bundle.min.js"></script>
+
 </head>
 
 <body>
-<div id="app">
-    <h1>{{ message }}</h1>
-    <p>Upload a subtitle!</p>
-    <input type="file" class="form-control" @change="onFileChange">
-    <button @click="onFileSubmit">Submit</button>
+<div id="app" class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+        <br><br>
+        <h1>{{ message }}</h1>
+        <form action="">
+            <div class="row">
+                <label for="operation" class="col-md-4">Choose an Operation</label>
+                <select name="operation" id="op" class="col-md-8" v-model="selectedMode" @change="onModeChange">
+                    <option v-for="(item, index) in VALID_MODES" :value="item">{{ item.desc }}</option>
+                </select>
+            </div>
+            <hr>
+            <div v-if="selectedMode !== ''">
+                <div v-if="isMergeMode">
+                    <h4>Subtitle (Top)</h4>
+                    <div class="row">
+                        <label for="subTop" class="col-md-2">Subtitle</label>
+                        <input type="file" name="subTop" class="col-md-10" @change="onFileChange">
+                    </div>
+                    <div class="row">
+                        <label for="encTop" class="col-md-6">Encoding</label>
+                        <select name="encTop" id="encTop" class="col-md-6" v-model="selectedEncTop" @change="onEncodingChange">
+                            <option v-for="(item, index) in VALID_ENCODINGS" :value="item">{{ item.desc }}</option>
+                        </select>
+                    </div>
+                    <hr>
+                </div>
+                <div>
+                    <h4>Subtitle (Bottom)</h4>
+                    <div class="row">
+                        <label for="subBottom" class="col-md-2">Subtitle</label>
+                        <input type="file" name="subBottom" class="col-md-8" @change="onFileChange"><br>
+                    </div>
+                    <div class="row">
+                        <label for="encBottom" class="col-md-6">Encoding</label>
+                        <select name="encBottom" id="encBottom" class="col-md-6" v-model="selectedEncBottom" @change="onEncodingChange">
+                            <option v-for="(item, index) in VALID_ENCODINGS" :value="item">{{ item.desc }}</option>
+                        </select>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <button @click="onFileSubmit">Submit</button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+    <div class="col-md-3"></div>
 </div>
 </body>
 
@@ -22,21 +75,88 @@
     new Vue({
         el: '#app',
         data : {
-            attachment : { name : null,file: null },
-            message : "Welcome to Tubtitle!"
+            VALID_MODES : [
+                {code : 'REMOVE_LETTERS', desc : 'Remove Accent Letters'},
+                {code : 'MERGE_SUB', desc : 'Merge Subtitles'}
+            ],
+            VALID_ENCODINGS : [
+                {code : "pl", desc : "Polish"},
+                {code : "tr", desc : "Turkish"},
+                {code : "en", desc : "English"}
+            ],
+            attachment : { name : null, file: null },
+            message : "Welcome to Tubtitle!",
+            selectedMode : "",
+            isMergeMode : false,
+            subs : {},
+            encMap : {
+                'encTop' : 'subTop',
+                'encBottom' : 'subBottom'
+            },
+            selectedEncTop : "",
+            selectedEncBottom : ""
         },
         methods : {
             onFileChange : function(event) {
-                this.attachment.file = event.target.files[0]
+                if (event.target === undefined) {
+                    return;
+                }
+
+                this.attachment.file = event.target.files[0];
+                var subName = event.target.name;
+                var f = event.target.files[0];
+                console.log(f);
+                if (this.subs[f.name] === undefined) {
+                    this.subs[subName] = { name : f.name, file : f, enc : null }
+                }
+                console.log(this.subs);
             },
-            onFileSubmit: function() {
+            onEncodingChange : function() {
+                var selectedEncName = event.target.name;
+                var mappedSub = this.encMap[selectedEncName];
+                if (this.subs[mappedSub] === undefined) {
+                    alert('Subtitle file is not selected!');
+                    return;
+                }
+
+                // TODO: find a better solution
+                // this.subs[mappedSub].enc = this.selectedEnc.code;
+                this.subs[mappedSub].enc = selectedEncName.indexOf('Top') > -1 ? this.selectedEncTop.code : this.selectedEncBottom.code;
+                console.log(this.subs);
+            },
+            onFileSubmit : function() {
+                event.preventDefault();
                 var form = new FormData();
 
                 form.append('name',this.attachment.name);
                 form.append('file',this.attachment.file);
-                this.$http.post('/api/upload', form).then(function(response){
+                this.$http.post('/api/upload', this.buildFormData(),{ headers : {
+                    'Content-Type' : 'multipart/form-data'
+                }}).then(function(response){
                     console.log("ok")
-                })
+                });
+                console.log(form);
+                console.log(this.buildFormData());
+            },
+            onModeChange : function() {
+                console.log(this.selectedMode);
+                this.isMergeMode = this.selectedMode.code === "MERGE_SUB";
+            },
+            buildFormData : function() {
+                var form = new FormData();
+                if (this.subs === undefined) {
+                    return form;
+                }
+
+                for (var key in this.subs) {
+                    var sub = this.subs[key];
+                    var suffix = key.indexOf('Top') > -1 ? 'Top' : 'Bottom';
+                    form.append('name' + suffix ,sub.name);
+                    form.append('file'+ suffix ,sub.file);
+                    form.append('enc'+ suffix ,sub.enc);
+                }
+
+                return form;
             }
         }
     })
