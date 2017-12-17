@@ -82,12 +82,17 @@ func prepareSubtitleForms(w http.ResponseWriter, r *http.Request) (utils.Subtitl
 	defer fileBottom.Close()
 
 	fileTop, headerTop, errt := r.FormFile("subTop")
-	if errb != nil || errt != nil {
+	defer fileTop.Close()
+
+	if errb != nil {
 		glog.Error(errb)
+		return utils.SubtitleForm{}, utils.SubtitleForm{}
+	}
+
+	if errt != nil {
 		glog.Error(errt)
 		return utils.SubtitleForm{}, utils.SubtitleForm{}
 	}
-	defer fileBottom.Close()
 
 	encsb, encst := r.Form["encBottom"], r.Form["encTop"]
 	if len(encsb) == 0 || len(encst) == 0 {
