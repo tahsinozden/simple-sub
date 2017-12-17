@@ -1,5 +1,9 @@
 package utils
 
+import (
+	"bytes"
+)
+
 // CommandArgs commandline args
 type CommandArgs struct {
 	Mode          string
@@ -16,4 +20,10 @@ type CommandArgs struct {
 type FileInfo struct {
 	FileName string
 	Encoding string
+}
+
+type SubtitleForm struct {
+	Name string
+	File *bytes.Buffer
+	Enc  string
 }

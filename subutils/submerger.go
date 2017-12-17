@@ -25,7 +25,7 @@ Format: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 const subTopLineTemplate = "Dialogue: Marked=0,%s,%s,StyleA,NTP,0000,0000,0000,!Effect,%s \n"
 const subBottomLineTemplate = "Dialogue: Marked=0,%s,%s,StyleB,NTP,0000,0000,0000,!Effect,%s \n"
 
-// MergeSubtitles : merges subtitles and creates a new file.
+// MergeSubtitles merges subtitles and creates a new file.
 func MergeSubtitles(c utils.CommandArgs) {
 	if !hasAllSubMergeParams(c) {
 		glog.Error("Missing merge params!")
@@ -37,7 +37,13 @@ func MergeSubtitles(c utils.CommandArgs) {
 	writeToFile(c.FileSubTop+".merged.ssa", merged)
 }
 
-// Merge : merges two subtitles
+func MergeSubtitlesByServer(b utils.SubtitleForm, t utils.SubtitleForm) string {
+	bottom, top := CreateSubEntries(b.File.String()), CreateSubEntries(t.File.String())
+	merged := Merge(top, bottom)
+	return merged
+}
+
+// Merge merges two subtitles
 func Merge(subUp []SubtitleEntry, subDown []SubtitleEntry) string {
 	var buffer bytes.Buffer
 	buffer.WriteString(metadata + "\n")
