@@ -23,11 +23,11 @@ func RemoveAccentLetters(c utils.CommandArgs) {
 		return
 	}
 
-	txt := readWithEncoding(c.FileName, getEncoding(c.Encoding))
+	txt := readWithEncoding(c.FileName, GetEncoding(c.Encoding))
 	writeToFile(c.FileName+".accents-removed.srt", txt)
 }
 
-func getEncoding(enc string) *charmap.Charmap {
+func GetEncoding(enc string) *charmap.Charmap {
 	if enc, ok := validEncodings[enc]; ok {
 		return enc
 	}
@@ -40,7 +40,7 @@ func readFile(f utils.FileInfo) string {
 	}
 
 	if len(f.Encoding) > 0 {
-		return readWithEncoding(f.FileName, getEncoding(f.Encoding))
+		return readWithEncoding(f.FileName, GetEncoding(f.Encoding))
 	}
 	return simpleRead(f.FileName)
 }
