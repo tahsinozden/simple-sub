@@ -9,12 +9,6 @@ import (
 	"tubtitle/utils"
 )
 
-type SubtitleForm struct {
-	Name string
-	File bytes.Buffer
-	Enc  string
-}
-
 var validModes = map[string]func(w http.ResponseWriter, r *http.Request){
 	"REMOVE_LETTERS": removeAccentLetters,
 	"MERGE_SUB":      mergeSubtitles,
@@ -75,7 +69,46 @@ func removeAccentLetters(w http.ResponseWriter, r *http.Request) {
 }
 
 func mergeSubtitles(w http.ResponseWriter, r *http.Request) {
-	// TODO: implement it
+	bottom, top := prepareSubtitleForms(w, r)
+	merged := subutils.MergeSubtitlesByServer(bottom, top)
+
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=new_sub.merged.srt"))
+	w.Header().Set("Content-Type", r.Header.Get("Content-Type"))
+	w.Write([]byte(merged))
+}
+
+func prepareSubtitleForms(w http.ResponseWriter, r *http.Request) (utils.SubtitleForm, utils.SubtitleForm) {
+	fileBottom, headerBottom, errb := r.FormFile("subBottom")
+	defer fileBottom.Close()
+
+	fileTop, headerTop, errt := r.FormFile("subTop")
+	defer fileTop.Close()
+
+	if errb != nil {
+		glog.Error(errb)
+		return utils.SubtitleForm{}, utils.SubtitleForm{}
+	}
+
+	if errt != nil {
+		glog.Error(errt)
+		return utils.SubtitleForm{}, utils.SubtitleForm{}
+	}
+
+	encsb, encst := r.Form["encBottom"], r.Form["encTop"]
+	if len(encsb) == 0 || len(encst) == 0 {
+		glog.Warning("No encoding found!")
+		http.Redirect(w, r, "../error.html", 301)
+	}
+
+	eb, et := encsb[0], encst[0]
+	fb, ft := headerBottom.Filename, headerTop.Filename
+	fmt.Printf("File name (Bottom): %s\n", fb)
+	fmt.Printf("File name (Top): %s\n", ft)
+
+	cb := utils.CopyWithEncoding(fileBottom, subutils.GetEncoding(eb))
+	ct := utils.CopyWithEncoding(fileTop, subutils.GetEncoding(et))
+
+	return utils.SubtitleForm{Name: fb, File: &cb, Enc: eb}, utils.SubtitleForm{Name: ft, File: &ct, Enc: et}
 }
 
 func parseRequest(w http.ResponseWriter, r *http.Request) map[string][]string {
