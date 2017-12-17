@@ -19,14 +19,15 @@
 
 <body>
 <div id="app" class="row">
-    <div class="col-md-3"></div>
-    <div class="col-md-6">
+    <div class="col-lg-4 col-md-3 col-sm-3 col-xs-3"></div>
+    <div class="col-lg-4 col-md-6 col-sm-6 col-xs-6">
+    <div class="container">
         <br><br>
         <h1>{{ message }}</h1>
         <form action="">
             <div class="row">
-                <label for="operation" class="col-md-4">Choose an Operation</label>
-                <select name="operation" id="op" class="col-md-8" v-model="selectedMode" @change="onModeChange">
+                <label for="operation" class="col-md-6">Choose an Operation</label>
+                <select name="operation" id="op" class="col-md-6" v-model="selectedMode" @change="onModeChange">
                     <option v-for="(item, index) in VALID_MODES" :value="item">{{ item.desc }}</option>
                 </select>
             </div>
@@ -64,10 +65,10 @@
                     <button @click="onFileSubmit">Submit</button>
                 </div>
             </div>
-
         </form>
     </div>
-    <div class="col-md-3"></div>
+    </div>
+    <div class="col-lg-4 col-md-3 col-sm-3 col-xs-3"></div>
 </div>
 </body>
 
