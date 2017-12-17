@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 	"tubtitle/utils"
+	"github.com/golang/glog"
 )
 
 func main() {
@@ -18,6 +19,7 @@ func main() {
 	c := parseCmd()
 	fmt.Printf("%+v\n", c)
 	Run(c)
+	glog.Flush()
 }
 
 func parseCmd() utils.CommandArgs {

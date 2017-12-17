@@ -24,11 +24,11 @@
     <div class="container">
         <br><br>
         <h1>{{ message }}</h1>
-        <form action="">
+        <form action="/api/subs" method="POST" enctype="multipart/form-data">
             <div class="row">
                 <label for="operation" class="col-md-6">Choose an Operation</label>
                 <select name="operation" id="op" class="col-md-6" v-model="selectedMode" @change="onModeChange">
-                    <option v-for="(item, index) in VALID_MODES" :value="item">{{ item.desc }}</option>
+                    <option v-for="(item, index) in VALID_MODES" :value="item.code">{{ item.desc }}</option>
                 </select>
             </div>
             <hr>
@@ -42,7 +42,7 @@
                     <div class="row">
                         <label for="encTop" class="col-md-6">Encoding</label>
                         <select name="encTop" id="encTop" class="col-md-6" v-model="selectedEncTop" @change="onEncodingChange">
-                            <option v-for="(item, index) in VALID_ENCODINGS" :value="item">{{ item.desc }}</option>
+                            <option v-for="(item, index) in VALID_ENCODINGS" :value="item.code">{{ item.desc }}</option>
                         </select>
                     </div>
                     <hr>
@@ -56,13 +56,13 @@
                     <div class="row">
                         <label for="encBottom" class="col-md-6">Encoding</label>
                         <select name="encBottom" id="encBottom" class="col-md-6" v-model="selectedEncBottom" @change="onEncodingChange">
-                            <option v-for="(item, index) in VALID_ENCODINGS" :value="item">{{ item.desc }}</option>
+                            <option v-for="(item, index) in VALID_ENCODINGS" :value="item.code">{{ item.desc }}</option>
                         </select>
                     </div>
                 </div>
                 <hr>
                 <div class="row">
-                    <button @click="onFileSubmit">Submit</button>
+                    <input type="submit" value="Submit">
                 </div>
             </div>
         </form>
@@ -122,16 +122,18 @@
 
                 // TODO: find a better solution
                 // this.subs[mappedSub].enc = this.selectedEnc.code;
-                this.subs[mappedSub].enc = selectedEncName.indexOf('Top') > -1 ? this.selectedEncTop.code : this.selectedEncBottom.code;
+                this.subs[mappedSub].enc = selectedEncName.indexOf('Top') > -1 ? this.selectedEncTop : this.selectedEncBottom;
                 console.log(this.subs);
             },
             onFileSubmit : function() {
+                // currently it wont be used since, ajax request response cannot be saved to the disk.
+                // now simple http form submission is used instead.
                 event.preventDefault();
                 var form = new FormData();
 
                 form.append('name',this.attachment.name);
                 form.append('file',this.attachment.file);
-                this.$http.post('/api/upload', this.buildFormData(),{ headers : {
+                this.$http.post('/api/subs', this.buildFormData(),{ headers : {
                     'Content-Type' : 'multipart/form-data'
                 }}).then(function(response){
                     console.log("ok")
@@ -141,7 +143,7 @@
             },
             onModeChange : function() {
                 console.log(this.selectedMode);
-                this.isMergeMode = this.selectedMode.code === "MERGE_SUB";
+                this.isMergeMode = this.selectedMode === "MERGE_SUB";
             },
             buildFormData : function() {
                 var form = new FormData();
